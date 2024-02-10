@@ -1,0 +1,57 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = 'mi-aplicacion-nodejs:latest'
+    }
+
+    stages {
+        stage('Preparar Entorno') {
+            steps {
+                // Limpiar el workspace
+                cleanWs()
+                // Clonar el repositorio podría ser un paso aquí, si es necesario
+                // checkout scm
+            }
+        }
+
+        stage('Construir Docker Image') {
+            steps {
+                // Construir la imagen de Docker usando el Dockerfile
+                script {
+                    docker.build(env.DOCKER_IMAGE, '.')
+                }
+            }
+        }
+
+        stage('Ejecutar Docker Container') {
+            steps {
+                // Ejecutar el contenedor basado en la imagen construida
+                script {
+                    docker.run("--name mi-contenedor-nodejs -d -p 3000:3000 ${env.DOCKER_IMAGE}")
+                }
+            }
+        }
+
+        stage('Verificar') {
+            steps {
+                // Aquí podrías agregar pasos para verificar que el contenedor está arriba,
+                // como un comando curl para asegurar que el servicio responde.
+                script {
+                    sh 'sleep 10' // Esperar brevemente para que el servicio inicie
+                    sh 'curl http://localhost:3000'
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Limpiar contenedores y imágenes si es necesario
+            script {
+                docker.rm('mi-contenedor-nodejs', '-f')
+                // docker rmi ${env.DOCKER_IMAGE} -f
+            }
+        }
+    }
+}
