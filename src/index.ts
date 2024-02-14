@@ -1,37 +1,35 @@
 import cors from "cors";
 import express from "express";
-import "dotenv/config";
-import router from "./routes/item";
+import dotenv from "dotenv";
+import dbConnect from "./database/db";
+
+import seedRoute from "./routes/seedRoute";
+import dataOffersRoute from "./routes/dataOffersRoute";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+dotenv.config();
 
 // Middleware para habilitar CORS
-app.use(
-  cors({
-    origin: "http://localhost:3000",
-  })
-);
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors());
+dotenv.config();
 
-// Middleware para loggear las peticiones
-// Middleware para loggear las peticiones
+dbConnect();
+
 app.use((req, res, next) => {
-  // Obtener la fecha y hora actual
   const now = new Date();
-  // Formatear la fecha y hora como deseas, aquí está en ISO para simplicidad
   const datetime = now.toISOString();
-  // Construir el log con la información deseada, incluyendo el status code
   let log = `[${datetime}] ${res.statusCode || "-"} ${req.method} ${req.path}`;
 
-  // Imprimir el log en consola
   console.log(log);
 
-  // No olvides llamar a next() para que la petición continúe su flujo
   next();
 });
 
-// Usar el router definido
-app.use(router);
+app.use("/api/seed", seedRoute);
+app.use("/api/get-offers", dataOffersRoute);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
