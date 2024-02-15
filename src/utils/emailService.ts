@@ -2,36 +2,35 @@ import { SendEmailCommand } from "@aws-sdk/client-ses";
 import { sesClient } from "./libs/sesClient";
 
 //CREDENCIALES
-
-const createSendEmail = (toAddress: string, fromAddress: string) => {
+const createSendEmail = (destAdress: string, email_code: number) => {
   return new SendEmailCommand({
     Destination: {
-      ToAddresses: [toAddress],
+      ToAddresses: [destAdress],
     },
-    Source: fromAddress,
+    Source: "sebascha.sistemas2003@gmail.com",
     Message: {
       Subject: {
         Data: "Test email",
       },
       Body: {
-        Text: {
-          Data: "This is the message body.",
+        Html: {
+          Data: `
+          <html>
+            <head>
+            </head>
+            <body>
+              <h1>HOLA INGRESA EL SIGUIENTE CÓDIGO DE VERIFICACIÓN :D</h1>
+              <p>Código</p>
+              <p>Código: ${email_code}</p>
+              <button>Verificar</button>
+            </body>
+          </html>
+          `  
         },
       },
     },
   });
+  
 };
 
-export const run = async () => {
-  const SendEmailCommand = createSendEmail(
-    "sebascha.sistemas2003@gmail.com",
-    "sebascha.sistemas2003@gmail.com"
-  );
-
-  try {
-    const data = await sesClient.send(SendEmailCommand);
-    console.log(data);
-  } catch (err) {
-    console.error(err);
-  }
-};
+export default createSendEmail;

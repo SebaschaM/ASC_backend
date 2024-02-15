@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { HeaderSection } from "../interfaces/headerSection";
-import { run } from "../utils/emailService";
+
+//ENVIO DE CORREO - SOLO PRUEBA
+//import { run } from "../utils/emailService";
 
 const insertDefaultData = async (req: Request, res: Response) => {
   try {
@@ -35,7 +37,7 @@ const insertDefaultData = async (req: Request, res: Response) => {
         },
       ],
     };
-    await run();
+    //await run();
     return res.status(200).json(defaultData)
 
   } catch (error) {
