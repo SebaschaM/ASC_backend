@@ -6,6 +6,7 @@ import dbConnect from "./database/db";
 import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/dataOffersRoute";
 
+ 
 const app = express();
 const PORT = process.env.PORT || 3000;
 dotenv.config();
@@ -17,6 +18,7 @@ app.use(cors());
 dotenv.config();
 
 dbConnect();
+
 
 app.use((req, res, next) => {
   const now = new Date();
