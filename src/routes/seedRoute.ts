@@ -1,5 +1,5 @@
 import express from "express";
-import { insertDefaultData } from "../controllers/seedController";  
+import { insertDefaultData } from "../controllers/seed/seedController";
 
 const router = express.Router();
 

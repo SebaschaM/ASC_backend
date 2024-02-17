@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 
 app.use("/api/seed", seedRoute);
 app.use("/api/auth", authUserRoute);
-app.use("/api/get-offers", dataOffersRoute);
+//app.use("/api/get-offers", dataOffersRoute);
 
 // Iniciar el servidor
 app.listen(PORT, () => {

@@ -9,7 +9,7 @@ async function dbConnect() {
     port: parseInt(process.env.DB_PORT as string),
   });
 
-  try {
+    try {
     await client.connect();
     console.log("Connected to database");
     return client;
