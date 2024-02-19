@@ -1,8 +1,8 @@
 import express from "express";
-import { getOffersData } from "../controllers/getOffersData";
+import { getOffersData } from "../controllers/candidate/getOffersData";
 
 const router = express.Router();
 
-router.get("/get-data-offers", getOffersData);
+router.get("/all", getOffersData);
 
 export default router;
