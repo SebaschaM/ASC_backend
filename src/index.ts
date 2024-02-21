@@ -5,7 +5,7 @@ import dbConnect from "./database/db";
 
 import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/dataOffersRoute";
-import authUserRoute from "./routes/authUserRoute";
+import authUserRoute from "./routes/authUserAuthRoute";
 
 const app = express();
 const PORT = process.env.PORT || 3000;

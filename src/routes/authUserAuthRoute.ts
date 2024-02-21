@@ -12,6 +12,11 @@ import {
   loginAuthCandidate,
 } from "../controllers/auth/candidate/authControllerCandidate";
 
+import {
+  verifyEmailCode,
+  verifyEmailCodeCompany,
+} from "../controllers/auth/email/authEmailVerification";
+
 const router = express.Router();
 
 //CANDIDATE ROUTES
@@ -23,5 +28,9 @@ router.post("/login/candidate", loginAuthCandidate);
 router.post("/company/register-incomplete", inCompleteRegisterCompany);
 router.post("/company/register-complete", completeRegisterCompany);
 router.post("/login/company", loginAuthCompany);
+
+//VERIFICAR EMIAIL_CODE
+router.post("/verify-email", verifyEmailCode);
+router.post("/verify-email-company", verifyEmailCodeCompany);
 
 export default router;

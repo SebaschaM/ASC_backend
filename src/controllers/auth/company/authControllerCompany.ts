@@ -3,27 +3,40 @@ import dbConnect from "../../../database/db";
 import brycpt from "bcrypt";
 import createSendEmail from "../../../utils/emailService";
 import { sesClient } from "../../../utils/libs/sesClient";
-import { Company } from "../../../interfaces/user";
+import { Company, CompanyInformation } from "../../../interfaces/user";
 
 const email_code_company: number = Math.floor(100000 + Math.random() * 900000);
+const email_code_company2: number = Math.floor(100000 + Math.random() * 900000);
 
 const inCompleteRegisterCompany = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
     const client = await dbConnect();
 
-    const queryEmailDuplicate = `SELECT COUNT(*) FROM "empresa" WHERE email = $1`;
+    const queryEmailDuplicateInactive = `SELECT COUNT(*) FROM "empresa" WHERE email = $1 AND account_confirm = 'FALSE'`;
 
-    const rows = await client?.query(queryEmailDuplicate, [email]);
+    const rowsInactive = await client?.query(queryEmailDuplicateInactive, [
+      email,
+    ]);
 
-    if (rows?.rows[0].count > 0) {
-      res.status(400).json({
-        message: "El email ya se encuentra registrado",
+    if (rowsInactive?.rows[0].count > 0) {
+      res.json({
+        message:
+          "El email ya se encuentra registrado, pero no ha sido activado",
       });
+
+      const queryUpdateCodeEmail = `UPDATE "empresa" SET email_code = $1 WHERE email = $2`;
+
+      await client?.query(queryUpdateCodeEmail, [email_code_company2, email]);
+
+      const sendEmail = createSendEmail(email, email_code_company2);
+
+      await sesClient.send(sendEmail);
+
       return;
     }
 
-    const queryInsert = `INSERT INTO "empresa" (email, account_confirm, email_code, active) VALUES ($1, FALSE, $2, FALSE)`;
+    const queryInsert = `INSERT INTO "empresa" (email, account_confirm, email_code, active, created_at) VALUES ($1, FALSE, $2, FALSE, CURRENT_TIMESTAMP)`;
 
     await client?.query(queryInsert, [email, email_code_company]);
 
@@ -31,8 +44,11 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
 
     await sesClient.send(sendEmail);
 
-    res.status(200).json({
+    res.json({
       message: "Email enviado",
+      data: {
+        email,
+      },
     });
   } catch (error: any) {
     res.status(500).json({
@@ -46,79 +62,100 @@ const completeRegisterCompany = async (req: Request, res: Response) => {
   try {
     const {
       email,
-      email_code,
-      name_company,
       password,
-      phone,
-      comercial_name,
+      movil,
+      nombre_completo,
+      nombre_comercial,
       razon_social,
-      sector,
-      description,
+      sector_id,
+      descripcion_empresa,
     } = req.body;
     const client = await dbConnect();
 
-    const queryEmail = `SELECT email_code FROM "empresa" WHERE email = $1`;
+    const queryEmailDuplicate = `SELECT COUNT(*) FROM "empresa" WHERE email = $1 AND account_confirm = 'TRUE' AND active = 'TRUE'`;
 
-    const rows = await client?.query(queryEmail, [email]);
-
-    if (rows?.rows[0].email_code !== email_code) {
-      res.status(400).json({
-        message: "El código no es válido",
-      });
-      return;
-    }
-
-    const queryEmailDuplicate = `
-      SELECT COUNT(*) 
-      FROM "empresa" 
-      WHERE email = '${email}' 
-      AND account_confirm = 'TRUE' 
-      AND active = 'TRUE'
-  `;
-
-    const rowsVerification = await client?.query(queryEmailDuplicate);
+    const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
 
     if (rowsVerification?.rows[0].count > 0) {
-      res.status(400).json({
+      res.json({
         message: "El email ya se encuentra registrado",
+        status: 400,
       });
       return;
     }
 
-    const insertCompanyInfoQuery = `
-        INSERT INTO "empresa_informacion" (movil, nombre_comercial, razon_social, descripcion_empresa)
-        VALUES ($1, $2, $3, $4)
-        RETURNING empresa_informacion_id
-      `;
-
-    const companyInfo = await client?.query(insertCompanyInfoQuery, [
-      phone,
-      comercial_name,
-      razon_social,
-      description,
-    ]);
-    const empresaInformationId = companyInfo?.rows[0].empresa_informacion_id;
-    console.log("registrando");
     const passwordEncrypt = await brycpt.hash(password, 10);
 
-    const updateCompanyQuery = `
-        UPDATE "empresa"
-        SET nombre_completo = $1, password = $2, sector_id = $3, account_confirm = TRUE, active = TRUE, empresa_informacion_id = $4, created_at = CURRENT_TIMESTAMP
-        WHERE email = $5
-        RETURNING empresa_informacion_id
-      `;
+    const queryUpdate = `UPDATE "empresa" SET nombre_completo = $1, password = $2, sector_id = $3, account_confirm = TRUE, active = TRUE, created_at = CURRENT_TIMESTAMP WHERE email = $4 RETURNING *`;
 
-    await client?.query(updateCompanyQuery, [
-      name_company,
+    const rows = await client?.query(queryUpdate, [
+      nombre_completo,
       passwordEncrypt,
-      sector,
-      empresaInformationId,
+      sector_id,
       email,
     ]);
 
+    const empresaInformationId = rows?.rows[0].empresa_id;
+
+    // ESTA TABLE SE ENCUENTRA RELACIONADA CON LA TABLA EMPRESA
+    const queryInsert = `INSERT INTO "empresa_informacion" (empresa_informacion_id, movil, nombre_comercial, razon_social, descripcion_empresa) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+
+    const company_info = await client?.query(queryInsert, [
+      empresaInformationId,
+      movil,
+      nombre_comercial,
+      razon_social,
+      descripcion_empresa,
+    ]);
+
+    const user: Company = rows?.rows[0];
+    const sector_idComp = user.sector_id;
+    const rubro = user.rubro;
+    const fullnames = user.nombre_completo;
+    const pais = user.pais;
+    const departamento_id = user.departamento_id;
+    const provincia_id = user.provincia_id;
+    const direccion = user.direccion;
+    const emailCompany = user.email;
+    const sitio_web = user.sitio_web;
+    const email_code = user.email_code;
+    const avatar = user.avatar;
+
+    const comapanyInformation: CompanyInformation = company_info?.rows[0];
+
+    //const razon_socialC = comapanyInformation.companyInformation.razon_social;
+    const fecha_fundacion = comapanyInformation.fecha_fundacion;
+    const ruc = comapanyInformation.ruc;
+    const telefono = comapanyInformation.telefono;
+    const movilComp = comapanyInformation.movil;
+    const nombre_Company = comapanyInformation.nombre_comercial;
+    const descriptionCompany = comapanyInformation.descripcion_empresa;
+
     res.status(200).json({
       message: "Registro completado",
+      status: 200,
+      data: {
+        emailCompany,
+        sector_idComp,
+        rubro,
+        fullnames,
+        pais,
+        departamento_id,
+        provincia_id,
+        direccion,
+        email_code,
+        avatar,
+        sitio_web,
+        fecha_fundacion,
+        ruc,
+        telefono,
+        movilComp,
+        nombre_Company,
+        descriptionCompany,
+      },
     });
+
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",
@@ -155,13 +192,13 @@ const loginAuthCompany = async (req: Request, res: Response) => {
     const departamento_id = company.departamento_id;
     const provincia_id = company.provincia_id;
     const sitio_web = company.sitio_web;
-    const razon_social = company.razon_social;
-    const fechas_fundacion = company.fechas_fundacion;
-    const ruc = company.ruc;
-    const telefono = company.telefono;
-    const movil = company.movil;
-    const nombre_comercial = company.nombre_comercial;
-    const descripcion_empresa = company.descripcion_empresa;
+    const razon_social = company.companyInformation.razon_social;
+    const fechas_fundacion = company.companyInformation.fecha_fundacion;
+    const ruc = company.companyInformation.ruc;
+    const telefono = company.companyInformation.telefono;
+    const movil = company.companyInformation.movil;
+    const comercial_name = company.companyInformation.nombre_comercial;
+    const descripcion_empresa = company.companyInformation.descripcion_empresa;
     const passwordCompany = rows?.rows[0].password;
 
     const passwordMatch = await brycpt.compare(password, passwordCompany);
@@ -189,7 +226,7 @@ const loginAuthCompany = async (req: Request, res: Response) => {
         ruc,
         telefono,
         movil,
-        nombre_comercial,
+        comercial_name,
         descripcion_empresa,
       },
     });

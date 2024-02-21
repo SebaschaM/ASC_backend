@@ -6,6 +6,7 @@ import { sesClient } from "../../../utils/libs/sesClient";
 import { Candidate } from "../../../interfaces/user";
 
 const email_code: number = Math.floor(100000 + Math.random() * 900000);
+const email_code2: number = Math.floor(100000 + Math.random() * 900000);
 
 // CANDIDATE
 const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
@@ -13,18 +14,32 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     const { email } = req.body;
     const client = await dbConnect();
 
-    const queryEmailDuplicate = `SELECT COUNT(*) FROM "postulante" WHERE email = $1`;
+    const queryEmailDuplicateInactive = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'FALSE'`;
 
-    const rows = await client?.query(queryEmailDuplicate, [email]);
+    const rowsInactive = await client?.query(queryEmailDuplicateInactive, [
+      email,
+    ]);
 
-    if (rows?.rows[0].count > 0) {
-      res.status(400).json({
-        message: "El email ya se encuentra registrado",
+    if (rowsInactive?.rows[0].count > 0) {
+      res.json({
+        message:
+          "El email ya se encuentra registrado, pero no ha sido activado",
+        status: 400,
       });
+
+      const queryUpdateCodeEmail = `UPDATE "postulante" SET email_code = $1 WHERE email = $2`;
+
+      await client?.query(queryUpdateCodeEmail, [email_code2, email]);
+
+      const sendEmail = createSendEmail(email, email_code2);
+
+      await sesClient.send(sendEmail);
+
       return;
     }
 
-    const queryInsert = `INSERT INTO "postulante" (email, account_confirm, email_code, active) VALUES ($1, FALSE, $2, FALSE)`;
+    //EN RESUMEN, SI EL EMAIL NO ESTÁ DUPLICADO, SE INSERTA EN LA BASE DE DATOS, PERO CON EL USUARIO INACTIVO
+    const queryInsert = `INSERT INTO "postulante" (email, account_confirm, email_code, active, created_at) VALUES ($1, FALSE, $2, FALSE, CURRENT_TIMESTAMP)`;
 
     await client?.query(queryInsert, [email, email_code]);
 
@@ -32,9 +47,14 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
 
     await sesClient.send(sendEmail);
 
-    res.status(200).json({
+    res.json({
       message: "Email enviado",
+      data: {
+        email,
+      },
     });
+
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",
@@ -46,40 +66,54 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
 
 const completeRegisterCandidate = async (req: Request, res: Response) => {
   try {
-    const { email, code, names, surnames, password } = req.body;
+    const { email, nombres, apellidos, password } = req.body;
     const client = await dbConnect();
 
-    const queryEmail = `SELECT email_code FROM "postulante" WHERE email = $1`;
+    const queryEmailDuplicateActivate = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'TRUE'`;
 
-    const rows = await client?.query(queryEmail, [email]);
-
-    if (rows?.rows[0].email_code !== code) {
-      res.status(400).json({
-        message: "El código no es válido",
-      });
-      return;
-    }
-
-    const queryEmailDuplicate = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'TRUE'`;
-
-    const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
+    const rowsVerification = await client?.query(queryEmailDuplicateActivate, [
+      email,
+    ]);
 
     if (rowsVerification?.rows[0].count > 0) {
-      res.status(400).json({
+      res.json({
         message: "El email ya se encuentra registrado",
+        status: 400,
       });
       return;
     }
 
     const passwordEncrypt = await brycpt.hash(password, 10);
 
-    const queryUpdate = `UPDATE "postulante" SET nombre = $1, apellidos = $2, password = $3, account_confirm = TRUE, active = TRUE, created_at = CURRENT_TIMESTAMP WHERE email = $4`;
+    const queryUpdate = `UPDATE "postulante" SET nombre = $1, apellidos = $2, password = $3, account_confirm = TRUE, active = TRUE WHERE email = $4 RETURNING *`;
 
-    await client?.query(queryUpdate, [names, surnames, passwordEncrypt, email]);
+    const rows = await client?.query(queryUpdate, [
+      nombres,
+      apellidos,
+      passwordEncrypt,
+      email,
+    ]);
 
-    res.status(200).json({
-      message: "Registro completado",
+    const user: Candidate = rows?.rows[0];
+    const emailCandidate = user.email;
+    const nombresC = user.nombre;
+    const apellidosC = user.apellidos;
+    const avatar = user.avatar;
+    const cv = user.cv;
+
+    res.json({
+      message: "Usuario activado",
+      status: 200,
+      data: {
+        emailCandidate,
+        nombresC,
+        apellidosC,
+        avatar,
+        cv,
+      },
     });
+
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",

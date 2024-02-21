@@ -5,7 +5,7 @@ async function dbConnect() {
     user: 'postgres',
     host: '34.30.8.232',
     database: 'asc_db',
-    password: 'pruebaxd123',
+    password: 'postsebas123',
     port: 5432,
   });
 
