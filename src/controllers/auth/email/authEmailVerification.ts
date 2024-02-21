@@ -13,7 +13,7 @@ const verifyEmailCode = async (req: Request, res: Response) => {
     const rows = await client?.query(queryEmail, [email]);
 
     if (rows?.rows[0].email_code !== email_code) {
-      res.json({
+      res.status(400).json({
         message: "Código incorrecto",
         status: 400,
       });
@@ -21,9 +21,10 @@ const verifyEmailCode = async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({
+    res.status(200).json({
       message: "Código correcto, siguiente paso",
       status: 200,
+      ok: true,
     });
 
     return;
@@ -47,7 +48,7 @@ const verifyEmailCodeCompany = async (req: Request, res: Response) => {
     const rows = await client?.query(queryEmail, [email]);
 
     if (rows?.rows[0].email_code !== email_code) {
-      res.json({
+      res.status(400).json({
         message: "Código incorrecto",
         status: 400,
       });
@@ -55,9 +56,10 @@ const verifyEmailCodeCompany = async (req: Request, res: Response) => {
       return;
     }
 
-    res.json({
+    res.status(200).json({
       message: "Código correcto, siguiente paso",
       status: 200,
+      ok: true,
     });
 
     return;

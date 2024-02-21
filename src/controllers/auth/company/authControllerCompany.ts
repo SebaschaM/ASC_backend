@@ -13,6 +13,17 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
     const { email } = req.body;
     const client = await dbConnect();
 
+    const queryEmailDuplicate = `SELECT COUNT(*) FROM "empresa" WHERE email = $1 AND account_confirm = 'TRUE'`;
+
+    const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
+
+    if (rowsVerification?.rows[0].count > 0) {
+      res.status(400).json({
+        message: "El email activo ya se encuentra registrado",
+      });
+      return;
+    }
+
     const queryEmailDuplicateInactive = `SELECT COUNT(*) FROM "empresa" WHERE email = $1 AND account_confirm = 'FALSE'`;
 
     const rowsInactive = await client?.query(queryEmailDuplicateInactive, [
@@ -20,11 +31,6 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
     ]);
 
     if (rowsInactive?.rows[0].count > 0) {
-      res.json({
-        message:
-          "El email ya se encuentra registrado, pero no ha sido activado",
-      });
-
       const queryUpdateCodeEmail = `UPDATE "empresa" SET email_code = $1 WHERE email = $2`;
 
       await client?.query(queryUpdateCodeEmail, [email_code_company2, email]);
@@ -33,6 +39,15 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
 
       await sesClient.send(sendEmail);
 
+      res.status(200).json({
+        message:
+          "El email ya se encuentra registrado, pero no ha sido activado",
+        status: 200,
+        ok: true,
+        data: {
+          email,
+        }
+      });
       return;
     }
 
@@ -44,12 +59,16 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
 
     await sesClient.send(sendEmail);
 
-    res.json({
-      message: "Email enviado",
+    res.status(200).json({
+      message: "Se ha enviado un código de verificación a su correo electrónico",
+      status: 200,
+      ok: true,
       data: {
         email,
-      },
+      }
     });
+
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",
@@ -57,6 +76,7 @@ const inCompleteRegisterCompany = async (req: Request, res: Response) => {
     });
   }
 };
+
 
 const completeRegisterCompany = async (req: Request, res: Response) => {
   try {
@@ -77,36 +97,37 @@ const completeRegisterCompany = async (req: Request, res: Response) => {
     const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
 
     if (rowsVerification?.rows[0].count > 0) {
-      res.json({
+      res.status(400).json({
         message: "El email ya se encuentra registrado",
         status: 400,
       });
       return;
     }
 
-    const passwordEncrypt = await brycpt.hash(password, 10);
-
-    const queryUpdate = `UPDATE "empresa" SET nombre_completo = $1, password = $2, sector_id = $3, account_confirm = TRUE, active = TRUE, created_at = CURRENT_TIMESTAMP WHERE email = $4 RETURNING *`;
-
-    const rows = await client?.query(queryUpdate, [
-      nombre_completo,
-      passwordEncrypt,
-      sector_id,
-      email,
-    ]);
-
-    const empresaInformationId = rows?.rows[0].empresa_id;
-
-    // ESTA TABLE SE ENCUENTRA RELACIONADA CON LA TABLA EMPRESA
-    const queryInsert = `INSERT INTO "empresa_informacion" (empresa_informacion_id, movil, nombre_comercial, razon_social, descripcion_empresa) VALUES ($1, $2, $3, $4, $5) RETURNING *`;
+    const queryInsert = `INSERT INTO "empresa_informacion" (movil, nombre_comercial, razon_social, descripcion_empresa) VALUES ($1, $2, $3, $4) RETURNING *`;
 
     const company_info = await client?.query(queryInsert, [
-      empresaInformationId,
       movil,
       nombre_comercial,
       razon_social,
       descripcion_empresa,
     ]);
+
+    const empresaInformationId = company_info?.rows[0].empresa_informacion_id;
+
+    const passwordEncrypt = await brycpt.hash(password, 10);
+
+    const queryUpdate = `UPDATE "empresa" SET nombre_completo = $1, password = $2, sector_id = $3, empresa_informacion_id = $4, account_confirm = TRUE, active = TRUE, created_at = CURRENT_TIMESTAMP WHERE email = $5 RETURNING *`;
+
+    const rows = await client?.query(queryUpdate, [
+      nombre_completo,
+      passwordEncrypt,
+      sector_id,
+      empresaInformationId,
+      email,
+    ]);
+
+    // ESTA TABLE SE ENCUENTRA RELACIONADA CON LA TABLA EMPRESA
 
     const user: Company = rows?.rows[0];
     const sector_idComp = user.sector_id;
@@ -134,6 +155,7 @@ const completeRegisterCompany = async (req: Request, res: Response) => {
     res.status(200).json({
       message: "Registro completado",
       status: 200,
+      ok: true,
       data: {
         emailCompany,
         sector_idComp,
@@ -170,66 +192,72 @@ const loginAuthCompany = async (req: Request, res: Response) => {
     const client = await dbConnect();
 
     // Obtener el hash de la contraseña almacenada en la base de datos
-    const query = `
-    SELECT *
-    FROM empresa
-    INNER JOIN empresa_informacion ON empresa.empresa_informacion_id = empresa_informacion.empresa_informacion_id
-    WHERE empresa.email = $1
-    `;
+    const query = `SELECT * FROM empresa INNER JOIN empresa_informacion ON empresa.empresa_informacion_id = empresa_informacion.empresa_informacion_id WHERE empresa.email = $1`;
     const rows = await client?.query(query, [email]);
 
     if (rows?.rows.length === 0) {
       res.status(400).json({
         message: "El email no existe",
+        status: 400,
       });
       return;
     }
 
-    const company: Company = rows?.rows[0];
-    const sector_id = company.sector_id;
-    const rubro = company.rubro;
-    const pais = company.pais;
-    const departamento_id = company.departamento_id;
-    const provincia_id = company.provincia_id;
-    const sitio_web = company.sitio_web;
-    const razon_social = company.companyInformation.razon_social;
-    const fechas_fundacion = company.companyInformation.fecha_fundacion;
-    const ruc = company.companyInformation.ruc;
-    const telefono = company.companyInformation.telefono;
-    const movil = company.companyInformation.movil;
-    const comercial_name = company.companyInformation.nombre_comercial;
-    const descripcion_empresa = company.companyInformation.descripcion_empresa;
-    const passwordCompany = rows?.rows[0].password;
+    const user = rows?.rows[0];
+    const userPassword = rows?.rows[0].password;
 
-    const passwordMatch = await brycpt.compare(password, passwordCompany);
+    const passwordMatch = await brycpt.compare(password, userPassword);
 
     if (!passwordMatch) {
       res.status(400).json({
-        message: "La contraseña es incorrecta",
+        message: "Contraseña incorrecta, inténtelo de nuevo",
+        status: 400,
       });
       return;
     }
+
+    const sector_id = user.sector_id;
+    const rubro = user.rubro;
+    const fullnames = user.nombre_completo;
+    const pais = user.pais;
+    const departamento_id = user.departamento_id;
+    const provincia_id = user.provincia_id;
+    const direccion = user.direccion;
+    const emailCompa = user.email;
+    const sitio_web = user.sitio_web;
+    const razonsocial = user.razon_social;
+    const fecha_fundacion = user.fecha_fundacion;
+    const ruc = user.ruc;
+    const telefono = user.telefono;
+    const movil = user.movil;
+    const nombre_comercial = user.nombre_comercial;
+    const descripcion_empresa = user.descripcion_empresa;
 
     res.status(200).json({
       message: "Login correcto",
       status: 200,
+      ok: true,
       data: {
-        email,
+        emailCompa,
         sector_id,
         rubro,
+        fullnames,
         pais,
         departamento_id,
         provincia_id,
+        direccion,
         sitio_web,
-        razon_social,
-        fechas_fundacion,
+        razonsocial,
+        fecha_fundacion,
         ruc,
         telefono,
         movil,
-        comercial_name,
+        nombre_comercial,
         descripcion_empresa,
       },
     });
+
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",

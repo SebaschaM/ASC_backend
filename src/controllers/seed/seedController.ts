@@ -38,7 +38,12 @@ const insertDefaultData = async (req: Request, res: Response) => {
       ],
     };
     //await run();
-    return res.status(200).json(defaultData);
+    return res.status(200).json({
+      message: "Datos por defecto insertados",
+      ok: true, 
+      status: 200,
+      data: defaultData,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ message: "Internal server error" });

@@ -14,6 +14,18 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     const { email } = req.body;
     const client = await dbConnect();
 
+    const queryEmailDuplicate = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'TRUE'`;
+
+    const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
+
+    if (rowsVerification?.rows[0].count > 0) {
+      res.status(400).json({
+        message: "El email ya se encuentra registrado",
+        status: 400,
+      });
+      return;
+    }
+
     const queryEmailDuplicateInactive = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'FALSE'`;
 
     const rowsInactive = await client?.query(queryEmailDuplicateInactive, [
@@ -21,10 +33,14 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     ]);
 
     if (rowsInactive?.rows[0].count > 0) {
-      res.json({
+      res.status(200).json({
+        ok: true,
+        status: 200,
         message:
           "El email ya se encuentra registrado, pero no ha sido activado",
-        status: 400,
+        data: {
+          email,
+        },
       });
 
       const queryUpdateCodeEmail = `UPDATE "postulante" SET email_code = $1 WHERE email = $2`;
@@ -47,8 +63,10 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
 
     await sesClient.send(sendEmail);
 
-    res.json({
+    res.status(200).json({
       message: "Email enviado",
+      status: 200,
+      ok: true,
       data: {
         email,
       },
@@ -76,7 +94,7 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
     ]);
 
     if (rowsVerification?.rows[0].count > 0) {
-      res.json({
+      res.status(400).json({
         message: "El email ya se encuentra registrado",
         status: 400,
       });
@@ -101,9 +119,10 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
     const avatar = user.avatar;
     const cv = user.cv;
 
-    res.json({
+    res.status(200).json({
       message: "Usuario activado",
       status: 200,
+      ok: true,
       data: {
         emailCandidate,
         nombresC,
@@ -133,7 +152,8 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
 
     if (rows?.rows.length === 0) {
       res.status(400).json({
-        message: "El email no existe",
+        message: "El email no se encuentra registrado",
+        status: 400,
       });
       return;
     }
@@ -160,6 +180,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
     res.status(200).json({
       message: "Login correcto",
       status: 200,
+      ok: true,
       data: {
         emailCandidate,
         nombres,
@@ -168,6 +189,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
         cv,
       },
     });
+    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",
