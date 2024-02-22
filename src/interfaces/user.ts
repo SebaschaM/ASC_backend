@@ -6,6 +6,7 @@ export interface Candidate {
   apellidos: string;
   avatar: string;
   cv: string;
+  created_at: string;
 }
 
 export interface Company {

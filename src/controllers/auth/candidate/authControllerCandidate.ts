@@ -161,11 +161,12 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
     //EXTRAER TODA LA INFO DE LA QUERY
     const user: Candidate = rows?.rows[0];
     const emailCandidate = user.email;
-    const nombres = user.nombre;
-    const apellidos = user.apellidos;
+    const nombresC = user.nombre;
+    const apellidosC = user.apellidos;
     const passwordHash = user.password;
     const avatar = user.avatar;
     const cv = user.cv;
+    const created_at = user.created_at;
 
     //COMPARAR LA CONTRASEÑA
     const passwordMatch = await brycpt.compare(password, passwordHash);
@@ -183,10 +184,11 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
       ok: true,
       data: {
         emailCandidate,
-        nombres,
-        apellidos,
+        nombresC,
+        apellidosC,
         avatar,
         cv,
+        created_at
       },
     });
     return;

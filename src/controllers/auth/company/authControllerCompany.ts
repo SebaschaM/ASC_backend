@@ -139,12 +139,12 @@ const completeRegisterCompany = async (req: Request, res: Response) => {
     const direccion = user.direccion;
     const emailCompany = user.email;
     const sitio_web = user.sitio_web;
-    const email_code = user.email_code;
+    //const email_code = user.email_code;
     const avatar = user.avatar;
 
     const comapanyInformation: CompanyInformation = company_info?.rows[0];
 
-    //const razon_socialC = comapanyInformation.companyInformation.razon_social;
+    const razon_socialC = comapanyInformation.razon_social;
     const fecha_fundacion = comapanyInformation.fecha_fundacion;
     const ruc = comapanyInformation.ruc;
     const telefono = comapanyInformation.telefono;
@@ -165,7 +165,7 @@ const completeRegisterCompany = async (req: Request, res: Response) => {
         departamento_id,
         provincia_id,
         direccion,
-        email_code,
+        razon_socialC,
         avatar,
         sitio_web,
         fecha_fundacion,
@@ -216,44 +216,46 @@ const loginAuthCompany = async (req: Request, res: Response) => {
       return;
     }
 
-    const sector_id = user.sector_id;
+    const sector_idComp = user.sector_id;
     const rubro = user.rubro;
     const fullnames = user.nombre_completo;
     const pais = user.pais;
     const departamento_id = user.departamento_id;
     const provincia_id = user.provincia_id;
     const direccion = user.direccion;
-    const emailCompa = user.email;
+    const emailCompany = user.email;
     const sitio_web = user.sitio_web;
-    const razonsocial = user.razon_social;
+    const avatar = user.avatar;
+    const razon_socialC = user.razon_social;
     const fecha_fundacion = user.fecha_fundacion;
     const ruc = user.ruc;
     const telefono = user.telefono;
-    const movil = user.movil;
-    const nombre_comercial = user.nombre_comercial;
-    const descripcion_empresa = user.descripcion_empresa;
+    const movilComp = user.movil;
+    const nombre_Company = user.nombre_comercial;
+    const descriptionCompany = user.descripcion_empresa;
 
     res.status(200).json({
       message: "Login correcto",
       status: 200,
       ok: true,
       data: {
-        emailCompa,
-        sector_id,
+        emailCompany,
+        sector_idComp,
         rubro,
         fullnames,
         pais,
         departamento_id,
         provincia_id,
         direccion,
+        avatar,
+        razon_socialC,
         sitio_web,
-        razonsocial,
         fecha_fundacion,
         ruc,
         telefono,
-        movil,
-        nombre_comercial,
-        descripcion_empresa,
+        movilComp,
+        nombre_Company,
+        descriptionCompany,
       },
     });
 
