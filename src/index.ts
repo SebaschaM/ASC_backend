@@ -6,6 +6,7 @@ import dbConnect from "./database/db";
 import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/dataOffersRoute";
 import authUserRoute from "./routes/authUserAuthRoute";
+import dataLocationsRoute from "./routes/dataLocationsRoute";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +33,7 @@ app.use((req, res, next) => {
 app.use("/api/seed", seedRoute);
 app.use("/api/auth", authUserRoute);
 app.use("/api/get-offers", dataOffersRoute);
+app.use("/api/get-locations", dataLocationsRoute);
 //app.use("/api/get-offers", dataOffersRoute);
 
 // Iniciar el servidor

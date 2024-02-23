@@ -1,9 +1,6 @@
 import { Request, Response } from "express";
 import { HeaderSection } from  "../../interfaces/headerSection"
 
-//ENVIO DE CORREO - SOLO PRUEBA
-//import { run } from "../utils/emailService";
-
 const insertDefaultData = async (req: Request, res: Response) => {
   try {
     const defaultData: HeaderSection = {
@@ -37,7 +34,6 @@ const insertDefaultData = async (req: Request, res: Response) => {
         },
       ],
     };
-    //await run();
     return res.status(200).json({
       message: "Datos por defecto insertados",
       ok: true, 
