@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import dbConnect from "../../database/db";
 
-const getLocationsGeo = async (req: Request, res: Response) => {
+const getLocationsGeo = async (_req: Request, res: Response) => {
   try {
     const client = await dbConnect();
     const query = `
@@ -16,10 +16,36 @@ const getLocationsGeo = async (req: Request, res: Response) => {
     left join provincia b 
         ON a.departamento_id = b.departamento_id
     left join distrito c
-        ON b.provincia_id = c.provincia_id
-    `;
+        ON b.provincia_id = c.provincia_id`;
     const response = await client?.query(query);
     //console.log(response?.rows);
+
+    const data = response?.rows.reduce(
+      (
+        acc,
+        { ubigeo, nombre_departamento, nombre_provincia, nombre_distrito }
+      ) => {
+        let departamento = acc.find(
+          (dep: any) => dep.nombre_departamento === nombre_departamento
+        );
+        if (!departamento) {
+          departamento = { nombre_departamento, provincias: [] };
+          acc.push(departamento);
+        }
+
+        let provincia = departamento.provincias.find(
+          (prov: any) => prov.nombre_provincia === nombre_provincia
+        );
+        if (!provincia) {
+          provincia = { nombre_provincia, distritos: [] };
+          departamento.provincias.push(provincia);
+        }
+
+        provincia.distritos.push({ ubigeo, nombre_distrito });
+        return acc;
+      },
+      []
+    );
 
     client?.end();
 
@@ -27,7 +53,7 @@ const getLocationsGeo = async (req: Request, res: Response) => {
       message: "Success",
       ok: true,
       status: 200,
-      data: response?.rows,
+      data: data,
     });
   } catch (error) {
     console.log(error);
