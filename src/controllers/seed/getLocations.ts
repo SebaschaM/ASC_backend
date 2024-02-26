@@ -7,9 +7,9 @@ const getLocationsGeo = async (_req: Request, res: Response) => {
     const query = `
     select 
         c.distrito_id as Ubigeo,
-        --a.departamento_id,
+        a.departamento_id,
         a.nombre_departamento, 
-        --b.provincia_id,
+        b.provincia_id,
         b.nombre_provincia,
         c.nombre_distrito
     from departamento a
@@ -23,13 +23,24 @@ const getLocationsGeo = async (_req: Request, res: Response) => {
     const data = response?.rows.reduce(
       (
         acc,
-        { ubigeo, nombre_departamento, nombre_provincia, nombre_distrito }
+        {
+          ubigeo,
+          departamento_id,
+          nombre_departamento,
+          nombre_provincia,
+          nombre_distrito,
+          provincia_id
+        }
       ) => {
         let departamento = acc.find(
           (dep: any) => dep.nombre_departamento === nombre_departamento
         );
         if (!departamento) {
-          departamento = { nombre_departamento, provincias: [] };
+          departamento = {
+            departamento_id,
+            nombre_departamento,
+            provincias: [],
+          };
           acc.push(departamento);
         }
 
@@ -37,7 +48,7 @@ const getLocationsGeo = async (_req: Request, res: Response) => {
           (prov: any) => prov.nombre_provincia === nombre_provincia
         );
         if (!provincia) {
-          provincia = { nombre_provincia, distritos: [] };
+          provincia = { provincia_id, nombre_provincia, distritos: [] };
           departamento.provincias.push(provincia);
         }
 
