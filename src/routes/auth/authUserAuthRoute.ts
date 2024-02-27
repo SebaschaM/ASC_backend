@@ -4,18 +4,18 @@ import {
   inCompleteRegisterCompany,
   completeRegisterCompany,
   loginAuthCompany,
-} from "../controllers/auth/company/authControllerCompany";
+} from "../../controllers/auth/company/authControllerCompany";
 
 import {
   inCompleteRegisterCandidate,
   completeRegisterCandidate,
   loginAuthCandidate,
-} from "../controllers/auth/candidate/authControllerCandidate";
+} from "../../controllers/auth/candidate/authControllerCandidate";
 
 import {
   verifyEmailCode,
   verifyEmailCodeCompany,
-} from "../controllers/auth/email/authEmailVerification";
+} from "../../controllers/auth/email/authEmailVerification";
 
 const router = express.Router();
 
