@@ -7,6 +7,7 @@ export interface Candidate {
   apellidos: string;
   avatar: string;
   cv: string;
+  cv_visible: boolean;
   created_at: string;
 }
 

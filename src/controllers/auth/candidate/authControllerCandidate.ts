@@ -118,6 +118,7 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
     const apellidosC = user.apellidos;
     const avatar = user.avatar;
     const cv = user.cv;
+    const cv_visible = user.cv_visible;
 
     res.status(200).json({
       message: "Usuario activado",
@@ -129,6 +130,7 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
         apellidosC,
         avatar,
         cv,
+        cv_visible,
       },
     });
 
@@ -167,6 +169,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
     const passwordHash = user.password;
     const avatar = user.avatar;
     const cv = user.cv;
+    const cv_visible = user.cv_visible;
     const created_at = user.created_at;
 
     //COMPARAR LA CONTRASEÑA
@@ -190,6 +193,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
         apellidosC,
         avatar,
         cv,
+        cv_visible,
         created_at
       },
     });

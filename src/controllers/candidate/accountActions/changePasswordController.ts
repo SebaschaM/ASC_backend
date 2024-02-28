@@ -3,18 +3,22 @@ import dbConnect from "../../../database/db";
 import bycript from "bcrypt";
 
 const changePassword = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { postulanteId, password } = req.body;
 
   try {
     const db = await dbConnect();
-    const query = `UPDATE postulante SET password = $1 WHERE email = $2`;
+    const query = `UPDATE postulante SET password = $1 WHERE postulante_id = $2`;
 
     // Encriptar nueva contraseña
     const passwordHash = await bycript.hash(password, 10);
 
-    await db?.query(query, [passwordHash, email]);
+    await db?.query(query, [passwordHash, postulanteId]);
 
-    res.status(200).json({ message: "Contraseña actualizada" });
+    res.status(200).json({
+      ok: true,
+      message: "Contraseña actualizada con éxito",
+      status: 200,
+    });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

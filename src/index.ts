@@ -4,10 +4,10 @@ import dotenv from "dotenv";
 import dbConnect from "./database/db";
 
 import seedRoute from "./routes/seedRoute";
-import dataOffersRoute from "./routes/offers/dataOffersRoute";
+import dataOffersRoute from "./routes/candidate/offers/dataOffersRoute";
 import authUserRoute from "./routes/auth/authUserAuthRoute";
 import dataLocationsRoute from "./routes/locations/dataLocationsRoute";
-import actionsCandidateRoute from "./routes/candidate/actionsCandidateRoute";
+import accountActionsRoute from "./routes/candidate/account/accountActionsController";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,7 +35,7 @@ app.use("/api/seed", seedRoute);
 app.use("/api/auth", authUserRoute);
 app.use("/api/offers", dataOffersRoute);
 app.use("/api/get-locations", dataLocationsRoute);
-app.use("/api/candidate/action", actionsCandidateRoute);
+app.use("/api/account", accountActionsRoute);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
