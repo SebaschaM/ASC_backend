@@ -1,5 +1,6 @@
 
 export interface Candidate {
+  postulante_id: string,
   email: string;
   password: string;
   nombre: string;

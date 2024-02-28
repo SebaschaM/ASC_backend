@@ -160,6 +160,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
 
     //EXTRAER TODA LA INFO DE LA QUERY
     const user: Candidate = rows?.rows[0];
+    const id_user = user.postulante_id;
     const emailCandidate = user.email;
     const nombresC = user.nombre;
     const apellidosC = user.apellidos;
@@ -183,6 +184,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
       status: 200,
       ok: true,
       data: {
+        id_user,
         emailCandidate,
         nombresC,
         apellidosC,

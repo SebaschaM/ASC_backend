@@ -216,6 +216,7 @@ const loginAuthCompany = async (req: Request, res: Response) => {
       return;
     }
 
+    const empresa_id = user.empresa_id;
     const sector_idComp = user.sector_id;
     const rubro = user.rubro;
     const fullnames = user.nombre_completo;
@@ -239,6 +240,7 @@ const loginAuthCompany = async (req: Request, res: Response) => {
       status: 200,
       ok: true,
       data: {
+        empresa_id,
         emailCompany,
         sector_idComp,
         rubro,
