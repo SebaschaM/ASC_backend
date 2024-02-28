@@ -25,8 +25,12 @@ const getOffersDataByLocation = async (req: Request, res: Response) => {
         ON om.oferta_modalidad_id = o.modalidad_trabajo_id
       LEFT JOIN oferta_area oa
         ON oa.oferta_area_id = o.area_id
+      LEFT JOIN tipo_moneda tm
+        ON tm.tipo_moneda_id = o.tipo_moneda_id
+      LEFT JOIN contrato c
+        ON c.contrato_id = o.tipo_contrato_id
       WHERE 
-        o.provincia_id = $1    
+        o.provincia_id = $1 AND o.estado_oferta_id = 1
     `;
     const result = await db.query(query, [location]);
     const offers = result?.rows.map((offer: any) => {
