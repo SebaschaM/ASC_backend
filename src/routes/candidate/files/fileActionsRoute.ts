@@ -7,6 +7,6 @@ const upload = multer();
 
 const app = express();
 
-app.post("/upload-file", upload.single("file"), uploadFileController);
+app.put("/upload-file", upload.single("file"), uploadFileController);
 
 export default app;

@@ -28,14 +28,18 @@ const uploadToGCS = async (file: any) => {
   const blob = bucket.file(newFileName);
   const blobStream = blob.createWriteStream();
 
+  // QUIERO QUE TMB ME RETORNE EL NEWFILENAME
+
   return new Promise((resolve, reject) => {
-    blobStream
-      .on("error", (err) => reject(err))
-      .on("finish", () => {
-        // El archivo ha sido subido a GCS
-        resolve(`gs://${bucketName}/${newFileName}`);
-      })
-      .end(file.buffer);
+    blobStream.on("error", (error) => {
+      reject(error);
+    });
+
+    blobStream.on("finish", () => {
+      resolve(newFileName);
+    });
+
+    blobStream.end(file.buffer);
   });
 };
 
