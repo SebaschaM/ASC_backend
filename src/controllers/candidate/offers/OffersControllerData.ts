@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import dbConnect from "../../../database/db";
 
+//FILTERS
 const getOffersDataByLocation = async (req: Request, res: Response) => {
   const { location } = req.params;
 
@@ -315,6 +316,34 @@ const getOffersDataByJobAndLocation = async (req: Request, res: Response) => {
           nombre: offer.tipo_contrato,
         },
         fecha_creacion: offer.fecha_creacion,
+      };
+    });
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      data: offers,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getOffersDataByCandidateId = async (req: Request, res: Response) => {
+  const { candidateId } = req.params;
+
+  try {
+    const db = await dbConnect();
+    const query = `SELECT * FROM postulacion WHERE postulante_id = $1`;
+    const result = await db?.query(query, [candidateId]);
+
+    const offers = result?.rows.map((offer: any) => {
+      return {
+        postulacion_id: offer.postulacion_id,
+        oferta_id: offer.oferta_id,
+        postulante_id: offer.postulante_id,
+        fecha_postulacion: offer.fecha_postulacion,
+        estado_postulacion_id: offer.estado_postulacion_id,
       };
     });
 

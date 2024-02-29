@@ -66,3 +66,35 @@ const updateEducationInfo = async (req: Request, res: Response) => {
     }
 }
 
+const insertEducationInfo = async (req: Request, res: Response) => {
+    const { postulanteId, institucion, titulo, fechaInicio, fechaFin, descripcion } =
+        req.body;
+    
+    try {
+        const db = await dbConnect();
+        const query = `
+                    INSERT INTO postulante_educacion
+                    (postulante_id, institucion, titulo, fecha_inicio, fecha_fin, descripcion)
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                `;
+    
+        if (!db) {
+        res.status(500).json({ error: "Error en la base de datos" });
+        return;
+        }
+    
+        await db?.query(query, [
+        postulanteId,
+        institucion,
+        titulo,
+        fechaInicio,
+        fechaFin,
+        descripcion,
+        ]);
+    
+        res.status(200).json({ ok: true });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+}
+
