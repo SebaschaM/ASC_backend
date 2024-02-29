@@ -2,17 +2,27 @@ import { Response, Request } from "express";
 import dbConnect from "../../../database/db";
 
 const changeVisibleCV = async (req: Request, res: Response) => {
-  const { visible, postulanteId } = req.body;
+  const { visibleState, postulanteId } = req.body;
 
   let cv_visible;
   
   try {
     const db = await dbConnect();
 
-    if (visible === 1) {
+    if (visibleState === 1) {
       cv_visible = true;
-    } else if (visible === 0) {
+    } else if (visibleState === 0) {
       cv_visible = false;
+    }
+
+    //en caso uno sea vacio o los dos
+
+    if (cv_visible === undefined || postulanteId === undefined) {
+      return res.status(400).json({
+        ok: false,
+        message: "Faltan datos para actualizar la visibilidad del CV",
+        status: 400,
+      });
     }
 
     const query = `UPDATE postulante SET cv_visible = $1 WHERE postulante_id = $2`;
