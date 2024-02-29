@@ -82,7 +82,7 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
   }
 };
 
-const completeRegisterCandidate = async (req: Request, res: Response) => {
+const completeRegisterCandidate = async (req: Request, res: Response) => { //PUT
   try {
     const { email, nombres, apellidos, password } = req.body;
     const client = await dbConnect();
@@ -103,7 +103,7 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
 
     const passwordEncrypt = await brycpt.hash(password, 10);
 
-    const queryUpdate = `UPDATE "postulante" SET nombre = $1, apellidos = $2, password = $3, account_confirm = TRUE, active = TRUE WHERE email = $4 RETURNING *`;
+    const queryUpdate = `UPDATE "postulante" SET nombre = $1, cv_visible = false, apellidos = $2, password = $3, account_confirm = TRUE, active = TRUE WHERE email = $4 RETURNING *`;
 
     const rows = await client?.query(queryUpdate, [
       nombres,
@@ -111,26 +111,48 @@ const completeRegisterCandidate = async (req: Request, res: Response) => {
       passwordEncrypt,
       email,
     ]);
-
+     
     const user: Candidate = rows?.rows[0];
+    const id_user = user.postulante_id;
+  
+    //UNA VEZ SE OBTENGA EL ID DE USUARIO, ESTE CREA UN REGISTRO EN postulante_contacto
+
+    const queryInsert_contact = `INSERT INTO "postulante_contacto" (postulante_id) VALUES ($1)`;
+    await client?.query(queryInsert_contact, [id_user]);
+    
+    const queryInsert_experience = `INSERT INTO "postulante_experiencia" (postulante_id) VALUES ($1)`;
+    await client?.query(queryInsert_experience, [id_user]);
+    
+    const queryInsert_education = `INSERT INTO "postulante_estudios" (postulante_id) VALUES ($1)`;
+    await client?.query(queryInsert_education, [id_user]);
+    
+    const queryInsert_language = `INSERT INTO "postulante_idiomas" (postulante_id) VALUES ($1)`;
+    await client?.query(queryInsert_language, [id_user]);
+    
+    const queryInsert_alert = `INSERT INTO "postulante_alertas" (postulante_id) VALUES ($1)`;
+    await client?.query(queryInsert_alert, [id_user]);
+
     const emailCandidate = user.email;
     const nombresC = user.nombre;
     const apellidosC = user.apellidos;
     const avatar = user.avatar;
     const cv = user.cv;
     const cv_visible = user.cv_visible;
+    const created_at = user.created_at;
 
     res.status(200).json({
       message: "Usuario activado",
       status: 200,
       ok: true,
       data: {
+        id_user,
         emailCandidate,
         nombresC,
         apellidosC,
         avatar,
         cv,
         cv_visible,
+        created_at
       },
     });
 

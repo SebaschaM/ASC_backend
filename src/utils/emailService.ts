@@ -1,5 +1,4 @@
 import { SendEmailCommand } from "@aws-sdk/client-ses";
-//import { sesClient } from "./libs/sesClient";
 
 //CREDENCIALES
 const createSendEmail = (destAdress: string, email_code: number) => {

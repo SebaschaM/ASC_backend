@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { uploadToGCS } from "../../../utils/libs/gcloudStClient";
+import { uploadToGCS } from "../../../utils/storageService";
 import dbConnect from "../../../database/db";
 
 const uploadFileController = async (req: Request, res: Response) => {
