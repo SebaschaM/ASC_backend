@@ -2,12 +2,14 @@ import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 import dbConnect from "./database/db";
+import path from "path";
 
 import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/candidate/offers/dataOffersRoute";
 import authUserRoute from "./routes/auth/authUserAuthRoute";
 import dataLocationsRoute from "./routes/locations/dataLocationsRoute";
 import accountActionsRoute from "./routes/candidate/account/accountActionsController";
+import fileActionsRoute from "./routes/candidate/files/fileActionsRoute";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,6 +20,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 dotenv.config();
+
+//uploadFileToGCloud(path.join(__dirname, "secrets/gcloud-storage.json"));
 
 dbConnect();
 
@@ -36,6 +40,7 @@ app.use("/api/auth", authUserRoute);
 app.use("/api/offers", dataOffersRoute);
 app.use("/api/get-locations", dataLocationsRoute);
 app.use("/api/account", accountActionsRoute);
+app.use("/api/files", fileActionsRoute);
 
 // Iniciar el servidor
 app.listen(PORT, () => {
