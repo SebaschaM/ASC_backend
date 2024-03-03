@@ -10,6 +10,7 @@ import authUserRoute from "./routes/auth/authUserAuthRoute";
 import dataLocationsRoute from "./routes/locations/dataLocationsRoute";
 import accountActionsRoute from "./routes/candidate/account/accountActionsController";
 import fileActionsRoute from "./routes/candidate/files/fileActionsRoute";
+import dataPostulationsRoute from "./routes/candidate/postulations/dataPostulationsRoute";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,6 +41,7 @@ app.use("/api/auth", authUserRoute);
 app.use("/api/offers", dataOffersRoute);
 app.use("/api/get-locations", dataLocationsRoute);
 app.use("/api/account", accountActionsRoute);
+app.use("/api/postulations", dataPostulationsRoute);
 app.use("/api/files", fileActionsRoute);
 
 // Iniciar el servidor
