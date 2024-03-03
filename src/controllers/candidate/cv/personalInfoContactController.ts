@@ -41,12 +41,12 @@ const getPersonalInfo = async (req: Request, res: Response) => {
   }
 };
 
-const updatePersonalInfo = async (req: Request, res: Response) => {
+const insertPersonalInfo = async (req: Request, res: Response) => {
   const {
     postulanteId,
     nombre,
     apellidos,
-    paisId,
+    //paisId,
     fechaNacimiento,
     estadoCivil,
     tipoDocumentoId,
@@ -55,34 +55,57 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
 
   try {
     const db = await dbConnect();
-    const query = `
-        UPDATE postulante_contacto
-        SET 
-            nombre = $1,
-            apellidos = $2,
-            --pais_id = $3,
-            fecha_nacimiento = $4,
-            estado_civil = $5,
-            tipo_documento_id = $6,
-            documento = $7
-        WHERE postulante_id = $8
+
+    //TABLA POSTULANTE
+    const queryPostulante = `
+        UPDATE postulante
+        SET nombre = $1,
+        apellidos = $2
+        WHERE postulante_id = $3
         RETURNING *
     `;
 
-    const data = await db?.query(query, [
+    const responseQueryPostulante = await db?.query(queryPostulante, [
       nombre,
       apellidos,
-      paisId,
+      postulanteId,
+    ]);
+
+    //TABLA POSTULANTE_CONTACTO
+    const query = `
+      INSERT INTO postulante_contacto(
+          postulante_id, 
+          pais_id, 
+          fecha_nacimiento, 
+          estado_civil, 
+          tipo_documento_id, 
+          documento)
+      VALUES ($1, 1, $2, $3, $4, $5)
+      ON CONFLICT (postulante_id)
+      DO UPDATE
+      SET fecha_nacimiento = $2,
+      estado_civil = $3,
+      tipo_documento_id = $4,
+      documento = $5
+      RETURNING *
+    `;
+
+    const responseQueryPostulanteContacto = await db?.query(query, [
+      postulanteId,
       fechaNacimiento,
       estadoCivil,
       tipoDocumentoId,
       documento,
-      postulanteId,
     ]);
 
+    const dataPersonalInfo = {
+      ...responseQueryPostulante?.rows[0],
+      ...responseQueryPostulanteContacto?.rows[0],
+    };
+
     res.status(200).json({
-      message: "Información actualizada",
-      data: data?.rows[0],
+      message: "Información guardada",
+      data: dataPersonalInfo,
       ok: true,
     });
   } catch (error: any) {
@@ -90,4 +113,4 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
   }
 };
 
-export { getPersonalInfo, updatePersonalInfo };
+export { getPersonalInfo, insertPersonalInfo };

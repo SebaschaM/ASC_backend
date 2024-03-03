@@ -82,7 +82,8 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
   }
 };
 
-const completeRegisterCandidate = async (req: Request, res: Response) => { //PUT
+const completeRegisterCandidate = async (req: Request, res: Response) => {
+  //PUT
   try {
     const { email, nombres, apellidos, password } = req.body;
     const client = await dbConnect();
@@ -111,27 +112,9 @@ const completeRegisterCandidate = async (req: Request, res: Response) => { //PUT
       passwordEncrypt,
       email,
     ]);
-     
+
     const user: Candidate = rows?.rows[0];
     const id_user = user.postulante_id;
-  
-    //UNA VEZ SE OBTENGA EL ID DE USUARIO, ESTE CREA UN REGISTRO EN postulante_contacto
-
-    const queryInsert_contact = `INSERT INTO "postulante_contacto" (postulante_id) VALUES ($1)`;
-    await client?.query(queryInsert_contact, [id_user]);
-    
-    const queryInsert_experience = `INSERT INTO "postulante_experiencia" (postulante_id) VALUES ($1)`;
-    await client?.query(queryInsert_experience, [id_user]);
-    
-    const queryInsert_education = `INSERT INTO "postulante_estudios" (postulante_id) VALUES ($1)`;
-    await client?.query(queryInsert_education, [id_user]);
-    
-    const queryInsert_language = `INSERT INTO "postulante_idiomas" (postulante_id) VALUES ($1)`;
-    await client?.query(queryInsert_language, [id_user]);
-    
-    const queryInsert_alert = `INSERT INTO "postulante_alertas" (postulante_id) VALUES ($1)`;
-    await client?.query(queryInsert_alert, [id_user]);
-
     const emailCandidate = user.email;
     const nombresC = user.nombre;
     const apellidosC = user.apellidos;
@@ -152,7 +135,7 @@ const completeRegisterCandidate = async (req: Request, res: Response) => { //PUT
         avatar,
         cv,
         cv_visible,
-        created_at
+        created_at,
       },
     });
 
@@ -216,7 +199,7 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
         avatar,
         cv,
         cv_visible,
-        created_at
+        created_at,
       },
     });
     return;
