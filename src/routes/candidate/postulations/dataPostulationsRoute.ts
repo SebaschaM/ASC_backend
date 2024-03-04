@@ -1,5 +1,5 @@
 import express from "express";
-import { getPostulationsApply } from "../../../controllers/candidate/postulations/postulationsApplyController";
+import { getPostulationsApply } from "../../../controllers/candidate/postulations/PostulationsApplyController";
 
 const router = express.Router();
 

@@ -22,7 +22,8 @@ const getPostulationsApply = async (req: Request, res: Response) => {
         post.actualizacion_descripcion,
         post.postulante_id,
         post.postulacion_id,
-        post.fecha_postulacion
+        post.fecha_postulacion,
+        post.postulacion_id
 
         FROM
         oferta of
@@ -51,7 +52,7 @@ const getPostulationsApply = async (req: Request, res: Response) => {
         departamento: offer.nombre_departamento,
         provincia: offer.nombre_provincia,
         estado: offer.estado,
-        descripcion: offer.actualizacion_descripcion,
+        descripcion_estado: offer.actualizacion_descripcion,
         postulante_id: offer.postulante_id,
         fecha_postulacion: offer.fecha_postulacion,
         id_estado_postulacion: offer.postulacion_estado_id,
@@ -70,5 +71,31 @@ const getPostulationsApply = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const savePostulationStateCandidate = async (req: Request, res: Response) => {
+  const { postulacionId, estadoId } = req.body;
+
+  try {
+    const db = await dbConnect();
+
+    const query = `
+        UPDATE postulacion
+        SET postulacion_estado_id = $1
+        WHERE postulacion_id = $2
+    `;
+
+    await db?.query(query, [estadoId, postulacionId]);
+
+    res.status(200).json({
+      ok: true,
+      message: "Estado de postulación actualizado",
+      status: 200,
+    });
+
+    return;
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 export { getPostulationsApply };

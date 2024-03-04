@@ -83,4 +83,24 @@ const insertAlertOffer = async (req: Request, res: Response) => {
   }
 };
 
-export { getAlertsOffer, updateAlertOffer, insertAlertOffer };
+const getAlertOfferDataById = async (req: Request, res: Response) => {
+  const { alertId } = req.params;
+
+  try {
+    const db = await dbConnect();
+
+    const query = `SELECT * FROM postulante_alertas WHERE alerta_id = $1`;
+
+    const response = await db?.query(query, [alertId]);
+
+    res.status(200).json({
+      data: response?.rows[0],
+      ok: true,
+      status: 200,
+    });
+  } catch (error: any) {
+    return error.message;
+  }
+};
+
+export { getAlertsOffer, updateAlertOffer, insertAlertOffer, getAlertOfferDataById };
