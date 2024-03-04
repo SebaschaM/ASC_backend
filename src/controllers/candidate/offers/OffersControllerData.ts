@@ -172,7 +172,7 @@ const getOffersDataByOfferArea = async (req: Request, res: Response) => {
   try {
     const db = await dbConnect();
     const query = `
-    SELECT 
+      SELECT 
       * 
       FROM 
       oferta o
@@ -195,6 +195,7 @@ const getOffersDataByOfferArea = async (req: Request, res: Response) => {
       LEFT JOIN contrato c
         ON c.contrato_id = o.tipo_contrato_id
       WHERE o.area_id = $1 AND o.estado_oferta_id = 1`;
+
     const result = await db?.query(query, [areaId]);
     const offers = result?.rows.map((offer: any) => {
       return {
@@ -329,28 +330,24 @@ const getOffersDataByJobAndLocation = async (req: Request, res: Response) => {
   }
 };
 
-const getOffersDataByCandidateId = async (req: Request, res: Response) => {
-  const { candidateId } = req.params;
-
+//COMPONENT HOME.TSX
+const getOfferAreasTop = async (req: Request, res: Response) => {
   try {
     const db = await dbConnect();
-    const query = `SELECT * FROM postulacion WHERE postulante_id = $1`;
-    const result = await db?.query(query, [candidateId]);
+    const query = `SELECT * FROM oferta_area ORDER BY nombre LIMIT 5`;
 
-    const offers = result?.rows.map((offer: any) => {
+    const result = await db?.query(query);
+    const areas = result?.rows.map((area: any) => {
       return {
-        postulacion_id: offer.postulacion_id,
-        oferta_id: offer.oferta_id,
-        postulante_id: offer.postulante_id,
-        fecha_postulacion: offer.fecha_postulacion,
-        estado_postulacion_id: offer.estado_postulacion_id,
+        area_id: area.oferta_area_id,
+        nombre: area.nombre,
       };
     });
 
     res.status(200).json({
       ok: true,
       status: 200,
-      data: offers,
+      data: areas,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -362,4 +359,5 @@ export {
   getOffersDataByJob,
   getOffersDataByOfferArea,
   getOffersDataByJobAndLocation,
+  getOfferAreasTop
 };
