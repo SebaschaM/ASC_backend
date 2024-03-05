@@ -359,5 +359,5 @@ export {
   getOffersDataByJob,
   getOffersDataByOfferArea,
   getOffersDataByJobAndLocation,
-  getOfferAreasTop
+  getOfferAreasTop,
 };
