@@ -73,18 +73,14 @@ const getPostulationsApply = async (req: Request, res: Response) => {
 };
 
 const savePostulationStateCandidate = async (req: Request, res: Response) => {
-  const { postulacionId, estadoId } = req.body;
+  const { descripcionEstado, postulacionId } = req.body;
 
   try {
     const db = await dbConnect();
 
-    const query = `
-        UPDATE postulacion
-        SET postulacion_estado_id = $1
-        WHERE postulacion_id = $2
-    `;
+    const query = `UPDATE postulacion SET actualizacion_descripcion = $1 WHERE postulacion_id = $2`;
 
-    await db?.query(query, [estadoId, postulacionId]);
+    await db?.query(query, [descripcionEstado, postulacionId]);
 
     res.status(200).json({
       ok: true,
@@ -96,6 +92,6 @@ const savePostulationStateCandidate = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
-}
+};
 
-export { getPostulationsApply };
+export { getPostulationsApply, savePostulationStateCandidate };
