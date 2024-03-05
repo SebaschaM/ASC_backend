@@ -2,7 +2,7 @@ import express from "express";
 import {
   getPostulationsApply,
   savePostulationStateCandidate,
-} from "../../../controllers/candidate/postulations/postulationsApplyController";
+} from "../../../controllers/candidate/postulation/postulationsApplyController";
 
 const router = express.Router();
 

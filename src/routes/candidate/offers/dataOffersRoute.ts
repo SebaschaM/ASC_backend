@@ -1,6 +1,6 @@
 import express from "express";
-import { getOffersDataByLocation, getOffersDataByJob, getOffersDataByOfferArea, getOffersDataByJobAndLocation, getOfferAreasTop } from "../../../controllers/candidate/offers/offersControllerData";
-import {applyOffer, getOffersByUser} from "../../../controllers/candidate/offers/applyOfferController";
+import { getOffersDataByLocation, getOffersDataByJob, getOffersDataByOfferArea, getOffersDataByJobAndLocation, getOfferAreasTop } from "../../../controllers/candidate/offer/offersControllerData";
+import {applyOffer, getOffersByUser} from "../../../controllers/candidate/offer/applyOfferController";
 
 const router = express.Router();
 
