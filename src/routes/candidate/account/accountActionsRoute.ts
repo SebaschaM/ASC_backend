@@ -11,6 +11,7 @@ import {insertEducationInfo} from "../../../controllers/candidate/cv/educationIn
 import {getLanguageInfo} from "../../../controllers/candidate/cv/languageInfoController";
 import {insertLanguageInfo} from "../../../controllers/candidate/cv/languageInfoController";
 import {changeEmail} from "../../../controllers/candidate/account/changeEmailController";
+import {getIncompletePersonalInfo} from "../../../controllers/candidate/cv/personalInfoContactController";
 
 const router = express.Router();
 
@@ -21,7 +22,8 @@ router.put("/candidate/deactivate-account", deactivateAccount);
 
 //PERSONAL INFO
 router.get("/candidate/get-personal-info/:postulanteId", getPersonalInfo);
-router.put("/candidate/personal-info", insertPersonalInfo);
+router.put("/candidate/update-personal-info", insertPersonalInfo);
+router.get("/candidate/get-incomplete-personal-info/:postulanteId", getIncompletePersonalInfo);
 
 //EXPERIENCIA INFO
 router.get("/candidate/get-experience-info/:postulanteId", getExperienceInfo);

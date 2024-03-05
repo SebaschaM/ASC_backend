@@ -8,7 +8,7 @@ import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/candidate/offers/dataOffersRoute";
 import authUserRoute from "./routes/auth/authUserAuthRoute";
 import dataLocationsRoute from "./routes/locations/dataLocationsRoute";
-import accountActionsRoute from "./routes/candidate/account/accountActionsController";
+import accountActionsRoute from "./routes/candidate/account/accountActionsRoute";
 import fileActionsRoute from "./routes/candidate/files/fileActionsRoute";
 import dataPostulationsRoute from "./routes/candidate/postulations/dataPostulationsRoute";
 import alertsOfferRoute from "./routes/candidate/alerts/alertsOfferRoute";

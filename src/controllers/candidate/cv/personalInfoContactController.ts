@@ -1,6 +1,45 @@
 import { Request, Response } from "express";
 import dbConnect from "../../../database/db";
 
+const getIncompletePersonalInfo = async (req: Request, res: Response) => {
+  const { postulanteId } = req.params;
+
+  try {
+    const db = await dbConnect();
+    const query = `
+      SELECT 
+        nombre,
+        apellidos,
+        email,
+        cv_visible,
+        cv,
+        numero,
+        direccion
+      FROM 
+      postulante_contacto pc
+      INNER JOIN postulante p
+          ON pc.postulante_id = p.postulante_id
+      WHERE pc.postulante_id = $1`;
+
+    if (!postulanteId) {
+      res.status(400).json({
+        message: "El id del postulante es requerido",
+        ok: false,
+      });
+      return;
+    }
+
+    const data = await db?.query(query, [postulanteId]);
+
+    res.status(200).json({
+      data: data?.rows[0],
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const getPersonalInfo = async (req: Request, res: Response) => {
   const { postulanteId } = req.params;
 
@@ -113,4 +152,4 @@ const insertPersonalInfo = async (req: Request, res: Response) => {
   }
 };
 
-export { getPersonalInfo, insertPersonalInfo };
+export { getPersonalInfo, insertPersonalInfo, getIncompletePersonalInfo };

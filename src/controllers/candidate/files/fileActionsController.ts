@@ -15,7 +15,7 @@ const uploadFileController = async (req: Request, res: Response) => {
     const url_public = `https://storage.googleapis.com/pruebaa-bucket-asc/${newNameFile}`;
 
     const query = `UPDATE postulante SET cv = $1 WHERE postulante_id = $2`;
-    await db?.query(query, [url_public, postulanteId  ]);
+    await db?.query(query, [url_public, postulanteId]);
 
     res.send({
       status: 200,
