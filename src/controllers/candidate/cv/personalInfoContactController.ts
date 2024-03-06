@@ -80,7 +80,31 @@ const getPersonalInfo = async (req: Request, res: Response) => {
   }
 };
 
-const insertPersonalInfo = async (req: Request, res: Response) => {
+const updateIncompletePersonalInfo = async (req: Request, res: Response) => {
+  const { postulanteId, numero, direccion, descripcion } = req.body;
+
+  try {
+    const db = await dbConnect();
+    const query = `UPDATE postulante_contacto SET numero = $1, direccion = $2, descripcion_perfil = $3 WHERE postulante_id = $4 RETURNING *`;
+
+    const data = await db?.query(query, [
+      numero,
+      direccion,
+      descripcion,
+      postulanteId,
+    ]);
+
+    res.status(200).json({
+      message: "Información guardada",
+      data: data?.rows[0],
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const updatePersonalInfo = async (req: Request, res: Response) => {
   const {
     postulanteId,
     nombre,
@@ -152,4 +176,9 @@ const insertPersonalInfo = async (req: Request, res: Response) => {
   }
 };
 
-export { getPersonalInfo, insertPersonalInfo, getIncompletePersonalInfo };
+export {
+  getPersonalInfo,
+  updatePersonalInfo,
+  getIncompletePersonalInfo,
+  updateIncompletePersonalInfo,
+};

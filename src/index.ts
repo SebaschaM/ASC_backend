@@ -2,7 +2,6 @@ import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 import dbConnect from "./database/db";
-import path from "path";
 
 import seedRoute from "./routes/seedRoute";
 import dataOffersRoute from "./routes/candidate/offers/dataOffersRoute";
@@ -12,6 +11,7 @@ import accountActionsRoute from "./routes/candidate/account/accountActionsRoute"
 import fileActionsRoute from "./routes/candidate/files/fileActionsRoute";
 import dataPostulationsRoute from "./routes/candidate/postulations/dataPostulationsRoute";
 import alertsOfferRoute from "./routes/candidate/alerts/alertsOfferRoute";
+// import { main } from "../src/utils/libs/secretsClient";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,6 +26,7 @@ dotenv.config();
 //uploadFileToGCloud(path.join(__dirname, "secrets/gcloud-storage.json"));
 
 dbConnect();
+// main("projects/ascprueba/secrets/storage-services-gcp/versions/latest");
 
 app.use((req, res, next) => {
   const now = new Date();

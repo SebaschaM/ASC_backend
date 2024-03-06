@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-ses": "^3.514.0",
+    "@google-cloud/secret-manager": "^5.1.0",
     "@google-cloud/storage": "^7.7.0",
     "@types/cors": "^2.8.17",
     "bcrypt": "^5.1.1",
