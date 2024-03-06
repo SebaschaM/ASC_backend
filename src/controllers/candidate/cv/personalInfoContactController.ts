@@ -47,17 +47,23 @@ const getPersonalInfo = async (req: Request, res: Response) => {
     const db = await dbConnect();
     const query = `
         SELECT 
-        nombre,
-        apellidos,
-        pais_id,
-        fecha_nacimiento,
-        estado_civil, 
-        tipo_documento_id,
-        documento
+          nombre,
+          apellidos,
+          pais_id,
+          fecha_nacimiento,
+          estado_civil, 
+          numero, 
+          direccion,
+          descripcion_perfil,
+          tp.tipo_documento_id,
+          tp.nombre_tipo_documento,
+          documento
         FROM 
-        postulante_contacto pc
+          postulante_contacto pc
         INNER JOIN postulante p
             ON pc.postulante_id = p.postulante_id
+        INNER JOIN tipo_documento tp
+          ON tp.tipo_documento_id = pc.tipo_documento_id
         WHERE pc.postulante_id = $1
     `;
 
@@ -73,6 +79,29 @@ const getPersonalInfo = async (req: Request, res: Response) => {
 
     res.status(200).json({
       data: data?.rows[0],
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getTypeDocument = async (req: Request, res: Response) => {
+  try {
+    const db = await dbConnect();
+    const query = `SELECT * FROM tipo_documento`;
+
+    const response = await db?.query(query);
+
+    const data = response?.rows.map((typeDocument: any) => {
+      return {
+        id: typeDocument.tipo_documento_id,
+        name: typeDocument.nombre_tipo_documento,
+      };
+    });
+
+    res.status(200).json({
+      data: data,
       ok: true,
     });
   } catch (error: any) {
@@ -102,7 +131,7 @@ const updateIncompletePersonalInfo = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
-};
+}; // NO SE USA ESA CONSULTA
 
 const updatePersonalInfo = async (req: Request, res: Response) => {
   const {
@@ -114,6 +143,9 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
     estadoCivil,
     tipoDocumentoId,
     documento,
+    descripcionPerfil,
+    numero,
+    direccion,
   } = req.body;
 
   try {
@@ -142,14 +174,21 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
           fecha_nacimiento, 
           estado_civil, 
           tipo_documento_id, 
-          documento)
-      VALUES ($1, 1, $2, $3, $4, $5)
+          documento,
+          descripcion_perfil,
+          numero,
+          direccion
+          )
+      VALUES ($1, 1, $2, $3, $4, $5, $6, $7, $8)
       ON CONFLICT (postulante_id)
       DO UPDATE
       SET fecha_nacimiento = $2,
       estado_civil = $3,
       tipo_documento_id = $4,
       documento = $5
+      descripcion_perfil = $6,
+      numero = $7,
+      direccion = $8
       RETURNING *
     `;
 
@@ -159,6 +198,9 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
       estadoCivil,
       tipoDocumentoId,
       documento,
+      descripcionPerfil,
+      numero,
+      direccion,
     ]);
 
     const dataPersonalInfo = {
@@ -181,4 +223,5 @@ export {
   updatePersonalInfo,
   getIncompletePersonalInfo,
   updateIncompletePersonalInfo,
+  getTypeDocument,
 };
