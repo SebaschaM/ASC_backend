@@ -185,7 +185,7 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
       SET fecha_nacimiento = $2,
       estado_civil = $3,
       tipo_documento_id = $4,
-      documento = $5
+      documento = $5,
       descripcion_perfil = $6,
       numero = $7,
       direccion = $8
