@@ -22,6 +22,17 @@ const getIncompletePersonalInfo = async (req: Request, res: Response) => {
           ON pc.postulante_id = p.postulante_id
       WHERE pc.postulante_id = $1`;
 
+    const queryAlternative = `
+      SELECT
+        nombre,
+        apellidos,
+        email, 
+        cv,
+        avatar,
+        cv_visible,
+        created_at
+      FROM postulante WHERE postulante_id = $1`;
+
     if (!postulanteId) {
       res.status(400).json({
         message: "El id del postulante es requerido",
@@ -31,11 +42,17 @@ const getIncompletePersonalInfo = async (req: Request, res: Response) => {
     }
 
     const data = await db?.query(query, [postulanteId]);
+    let dataAlternative;
 
-    res.status(200).json({
-      data: data?.rows[0],
+    if (data?.rows.length === 0) {
+      dataAlternative = await db?.query(queryAlternative, [postulanteId]);
+    }
+
+    return res.status(200).json({
+      data: data?.rows[0] || dataAlternative?.rows[0],
       ok: true,
     });
+
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

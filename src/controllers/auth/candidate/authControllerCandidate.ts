@@ -4,9 +4,7 @@ import brycpt from "bcrypt";
 import createSendEmail from "../../../utils/emailService";
 import { sesClient } from "../../../utils/libs/sesClient";
 import { Candidate } from "../../../interfaces/user";
-
-const email_code: number = Math.floor(100000 + Math.random() * 900000);
-const email_code2: number = Math.floor(100000 + Math.random() * 900000);
+import { generateEmailCode } from "../../../utils/generateEmailCode";
 
 // CANDIDATE
 const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
@@ -19,11 +17,10 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     const rowsVerification = await client?.query(queryEmailDuplicate, [email]);
 
     if (rowsVerification?.rows[0].count > 0) {
-      res.status(400).json({
+      return res.status(400).json({
         message: "El email ya se encuentra registrado",
         status: 400,
       });
-      return;
     }
 
     const queryEmailDuplicateInactive = `SELECT COUNT(*) FROM "postulante" WHERE email = $1 AND account_confirm = 'FALSE'`;
@@ -33,7 +30,17 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     ]);
 
     if (rowsInactive?.rows[0].count > 0) {
-      res.status(200).json({
+      const queryUpdateCodeEmail = `UPDATE "postulante" SET email_code = $1 WHERE email = $2`;
+
+      const email_code2 = generateEmailCode();
+
+      await client?.query(queryUpdateCodeEmail, [email_code2, email]);
+
+      const sendEmail = createSendEmail(email, email_code2);
+
+      await sesClient.send(sendEmail);
+
+      return res.status(200).json({
         ok: true,
         status: 200,
         message:
@@ -42,28 +49,21 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
           email,
         },
       });
-
-      const queryUpdateCodeEmail = `UPDATE "postulante" SET email_code = $1 WHERE email = $2`;
-
-      await client?.query(queryUpdateCodeEmail, [email_code2, email]);
-
-      const sendEmail = createSendEmail(email, email_code2);
-
-      await sesClient.send(sendEmail);
-
-      return;
     }
+
+    const email_code = generateEmailCode();
 
     //EN RESUMEN, SI EL EMAIL NO ESTÁ DUPLICADO, SE INSERTA EN LA BASE DE DATOS, PERO CON EL USUARIO INACTIVO
     const queryInsert = `INSERT INTO "postulante" (email, account_confirm, email_code, active, created_at) VALUES ($1, FALSE, $2, FALSE, CURRENT_TIMESTAMP)`;
 
-    await client?.query(queryInsert, [email, email_code]);
+    //ASDASD
+    await client?.query(queryInsert, [email, email_code]);  //ASDASD      
 
     const sendEmail = createSendEmail(email, email_code);
 
     await sesClient.send(sendEmail);
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Email enviado",
       status: 200,
       ok: true,
@@ -71,8 +71,6 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
         email,
       },
     });
-
-    return;
   } catch (error: any) {
     res.status(500).json({
       message: "Internal server error",
