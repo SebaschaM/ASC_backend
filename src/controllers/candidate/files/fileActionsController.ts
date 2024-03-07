@@ -14,7 +14,7 @@ const uploadFileController = async (req: Request, res: Response) => {
     const newNameFile = await uploadToGCS(req.file);
     const url_public = `https://storage.googleapis.com/pruebaa-bucket-asc/${newNameFile}`;
 
-    const query = `UPDATE postulante SET cv = $1, cv_visible = true WHERE postulante_id = $2`;
+    const query = `UPDATE postulante SET cv = $1 WHERE postulante_id = $2`;
     await db?.query(query, [url_public, postulanteId]);
 
     res.send({
@@ -28,4 +28,22 @@ const uploadFileController = async (req: Request, res: Response) => {
   }
 };
 
-export { uploadFileController };
+const deleteFile = async (req: Request, res: Response) => {
+  const { postulanteId } = req.body;
+
+  try {
+    const db = await dbConnect();
+    const query = `UPDATE postulante SET cv = null WHERE postulante_id = $1`;
+    await db?.query(query, [postulanteId]);
+
+    res.send({
+      status: 200,
+      message: "Archivo eliminado correctamente",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al eliminar el archivo");
+  }
+};
+
+export { uploadFileController, deleteFile };

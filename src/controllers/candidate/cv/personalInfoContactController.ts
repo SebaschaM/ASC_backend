@@ -52,7 +52,6 @@ const getIncompletePersonalInfo = async (req: Request, res: Response) => {
       data: data?.rows[0] || dataAlternative?.rows[0],
       ok: true,
     });
-
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
@@ -85,6 +84,12 @@ const getPersonalInfo = async (req: Request, res: Response) => {
         WHERE pc.postulante_id = $1
     `;
 
+    const alternativeQuery = `
+      SELECT
+        nombre,
+        apellidos
+      FROM postulante WHERE postulante_id = $1`;
+
     if (!postulanteId) {
       res.status(400).json({
         message: "El id del postulante es requerido",
@@ -94,9 +99,14 @@ const getPersonalInfo = async (req: Request, res: Response) => {
     }
 
     const data = await db?.query(query, [postulanteId]);
+    let dataAlternative;
+
+    if (data?.rows.length === 0) {
+      dataAlternative = await db?.query(alternativeQuery, [postulanteId]);
+    }
 
     res.status(200).json({
-      data: data?.rows[0],
+      data: data?.rows[0] || dataAlternative?.rows[0],
       ok: true,
     });
   } catch (error: any) {
@@ -184,6 +194,8 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
       postulanteId,
     ]);
 
+    console.log("INSERTANDO EN POSTULANTE");
+
     //TABLA POSTULANTE_CONTACTO
     const query = `
       INSERT INTO postulante_contacto(
@@ -210,6 +222,8 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
       RETURNING *
     `;
 
+    console.log("INSERTANDO ANTES DE INGRESAR");
+
     const responseQueryPostulanteContacto = await db?.query(query, [
       postulanteId,
       fechaNacimiento,
@@ -220,6 +234,8 @@ const updatePersonalInfo = async (req: Request, res: Response) => {
       numero,
       direccion,
     ]);
+
+    console.log("LISTO");
 
     const dataPersonalInfo = {
       ...responseQueryPostulante?.rows[0],

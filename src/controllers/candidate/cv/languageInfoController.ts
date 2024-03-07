@@ -47,6 +47,28 @@ const getLanguageInfo = async (req: Request, res: Response) => {
   }
 };
 
+const getLanguageList = async (req: Request, res: Response) => {
+  try {
+    const db = await dbConnect();
+    const query = `SELECT * FROM idiomas`;
+
+    const data = await db?.query(query);
+    const langugeList = data?.rows.map((language) => {
+      return {
+        id: language.idioma_id,
+        idioma: language.idioma,
+      };
+    });
+
+    return res.status(200).json({
+      data: langugeList,
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const insertLanguageInfo = async (req: Request, res: Response) => {
   const { postulanteId, idiomaId, nivelIdioma } = req.body;
 
@@ -158,4 +180,4 @@ const updateLanguageInfo = async (req: Request, res: Response) => {
   }
 }; //NO SE USA
 
-export { getLanguageInfo, insertLanguageInfo, deleteLanguageInfo };
+export { getLanguageInfo, insertLanguageInfo, deleteLanguageInfo, getLanguageList };

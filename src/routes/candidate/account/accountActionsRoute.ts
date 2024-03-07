@@ -17,6 +17,7 @@ import { getTypeDocument } from "../../../controllers/candidate/cv/personalInfoC
 import { deleteExperienceInfo } from "../../../controllers/candidate/cv/experienceInfoController";
 import { deleteEducationInfo } from "../../../controllers/candidate/cv/educationInfoController";
 import { deleteLanguageInfo } from "../../../controllers/candidate/cv/languageInfoController";
+import {getLanguageList} from "../../../controllers/candidate/cv/languageInfoController";
 
 const router = express.Router();
 
@@ -55,5 +56,6 @@ router.delete(
 router.get("/candidate/get-language-info/:postulanteId", getLanguageInfo);
 router.post("/candidate/language-info", insertLanguageInfo);
 router.delete("/candidate/language-info/:languageId", deleteLanguageInfo);
+router.get("/candidate/get-language-list", getLanguageList);
 
 export default router;
