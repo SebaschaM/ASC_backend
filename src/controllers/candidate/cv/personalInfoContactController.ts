@@ -14,7 +14,8 @@ const getIncompletePersonalInfo = async (req: Request, res: Response) => {
         cv_visible,
         cv,
         numero,
-        direccion
+        direccion,
+        descripcion_perfil
       FROM 
       postulante_contacto pc
       INNER JOIN postulante p

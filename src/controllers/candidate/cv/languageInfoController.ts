@@ -88,6 +88,35 @@ const insertLanguageInfo = async (req: Request, res: Response) => {
   }
 };
 
+const deleteLanguageInfo = async (req: Request, res: Response) => {
+  const { languageId } = req.params;
+
+  try {
+    const db = await dbConnect();
+    const query = `
+      DELETE FROM postulante_idiomas
+      WHERE postulante_idioma_id = $1
+    `;
+
+    if (!languageId) {
+      res.status(400).json({
+        message: "El id del idioma es requerido",
+        ok: false,
+      });
+      return;
+    }
+
+    await db?.query(query, [languageId]);
+
+    res.status(200).json({
+      reponse: "Idioma eliminado correctamente",
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateLanguageInfo = async (req: Request, res: Response) => {
   const { postulanteId, idiomaId, nivelIdioma } = req.body;
 
@@ -127,6 +156,6 @@ const updateLanguageInfo = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
-};
+}; //NO SE USA
 
-export { getLanguageInfo, insertLanguageInfo };
+export { getLanguageInfo, insertLanguageInfo, deleteLanguageInfo };

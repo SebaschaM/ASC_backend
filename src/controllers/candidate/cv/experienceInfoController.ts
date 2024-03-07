@@ -72,6 +72,27 @@ const insertExperienceInfo = async (req: Request, res: Response) => {
   }
 };
 
+const deleteExperienceInfo = async (req: Request, res: Response) => {
+  const { experienceId } = req.params;
+
+  try {
+    const db = await dbConnect();
+    const query = `
+      DELETE FROM postulante_experiencia
+      WHERE postulante_experiencia_id = $1
+    `;
+
+    await db?.query(query, [experienceId]);
+
+    res.status(200).json({
+      response: "Experiencia eliminada correctamente",
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateExperienceInfo = async (req: Request, res: Response) => {
   const { postulanteId, cargo, funciones, empresa, anio_inicio, anio_fin } =
     req.body;
@@ -110,6 +131,6 @@ const updateExperienceInfo = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
-}
+}; //NO SE USA
 
-export { getExperienceInfo, insertExperienceInfo };
+export { getExperienceInfo, insertExperienceInfo, deleteExperienceInfo };

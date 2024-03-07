@@ -78,6 +78,26 @@ const insertEducationInfo = async (req: Request, res: Response) => {
   }
 };
 
+const deleteEducationInfo = async (req: Request, res: Response) => {
+  const { postulanteEstudioId } = req.params;
+
+  try {
+    const db = await dbConnect();
+    const query = `
+        DELETE FROM postulante_estudios
+        WHERE postulante_estudio_id = $1 `;
+
+    await db?.query(query, [postulanteEstudioId]);
+
+    res.status(200).json({
+      response: "Estudio eliminado",
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateEducationInfo = async (req: Request, res: Response) => {
   const {
     postulanteId,
@@ -122,6 +142,6 @@ const updateEducationInfo = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
-};
+}; // NO SE USA
 
-export { getEducationInfo, insertEducationInfo };
+export { getEducationInfo, insertEducationInfo, deleteEducationInfo };
