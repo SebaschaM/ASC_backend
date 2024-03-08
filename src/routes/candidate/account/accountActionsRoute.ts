@@ -17,7 +17,8 @@ import { deleteExperienceInfo } from "../../../controllers/candidate/cv/experien
 import { deleteEducationInfo } from "../../../controllers/candidate/cv/educationInfoController";
 import { deleteLanguageInfo } from "../../../controllers/candidate/cv/languageInfoController";
 import { getLanguageList } from "../../../controllers/candidate/cv/languageInfoController";
-import {getCountries} from "../../../controllers/candidate/cv/personalInfoContactController";
+import { getCountries } from "../../../controllers/candidate/cv/personalInfoContactController";
+import { getCivilStatus } from "../../../controllers/candidate/cv/personalInfoContactController";
 
 const router = express.Router();
 
@@ -35,6 +36,7 @@ router.get(
 );
 router.get("/candidate/get-types-document", getTypeDocument);
 router.get("/candidate/get-countries", getCountries);
+router.get("/candidate/get-civil-status", getCivilStatus);
 
 //EXPERIENCIA INFO
 router.get("/candidate/get-experience-info/:postulanteId", getExperienceInfo);
