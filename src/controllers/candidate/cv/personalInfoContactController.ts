@@ -137,6 +137,29 @@ const getTypeDocument = async (req: Request, res: Response) => {
   }
 };
 
+const getCountries = async (req: Request, res: Response) => {
+  try {
+    const db = await dbConnect();
+    const query = `SELECT * FROM pais`;
+
+    const response = await db?.query(query);
+
+    const data = response?.rows.map((country: any) => {
+      return {
+        id: country.pais_id,
+        name: country.nombre_pais,
+      };
+    });
+
+    res.status(200).json({
+      data: data,
+      ok: true,
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const updateIncompletePersonalInfo = async (req: Request, res: Response) => {
   const { postulanteId, numero, direccion, descripcion } = req.body;
 
@@ -256,6 +279,6 @@ export {
   getPersonalInfo,
   updatePersonalInfo,
   getIncompletePersonalInfo,
-  updateIncompletePersonalInfo,
   getTypeDocument,
+  getCountries
 };

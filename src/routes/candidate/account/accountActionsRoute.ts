@@ -12,12 +12,12 @@ import { getLanguageInfo } from "../../../controllers/candidate/cv/languageInfoC
 import { insertLanguageInfo } from "../../../controllers/candidate/cv/languageInfoController";
 import { changeEmail } from "../../../controllers/candidate/account/changeEmailController";
 import { getIncompletePersonalInfo } from "../../../controllers/candidate/cv/personalInfoContactController";
-import { updateIncompletePersonalInfo } from "../../../controllers/candidate/cv/personalInfoContactController";
 import { getTypeDocument } from "../../../controllers/candidate/cv/personalInfoContactController";
 import { deleteExperienceInfo } from "../../../controllers/candidate/cv/experienceInfoController";
 import { deleteEducationInfo } from "../../../controllers/candidate/cv/educationInfoController";
 import { deleteLanguageInfo } from "../../../controllers/candidate/cv/languageInfoController";
-import {getLanguageList} from "../../../controllers/candidate/cv/languageInfoController";
+import { getLanguageList } from "../../../controllers/candidate/cv/languageInfoController";
+import {getCountries} from "../../../controllers/candidate/cv/personalInfoContactController";
 
 const router = express.Router();
 
@@ -33,11 +33,8 @@ router.get(
   "/candidate/get-incomplete-personal-info/:postulanteId",
   getIncompletePersonalInfo
 );
-router.put(
-  "/candidate/update-incomplete-personal-info",
-  updateIncompletePersonalInfo
-);
 router.get("/candidate/get-types-document", getTypeDocument);
+router.get("/candidate/get-countries", getCountries);
 
 //EXPERIENCIA INFO
 router.get("/candidate/get-experience-info/:postulanteId", getExperienceInfo);

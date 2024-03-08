@@ -75,6 +75,32 @@ const insertLanguageInfo = async (req: Request, res: Response) => {
   try {
     const db = await dbConnect();
 
+    const queryVerifyDuplicate = `
+    SELECT * FROM postulante_idiomas WHERE postulante_id = $1 AND idioma_id = $2
+    `;
+
+    const resposne = await db?.query(queryVerifyDuplicate, [
+      postulanteId,
+      idiomaId,
+    ]);
+
+    if (resposne?.rows.length > 0) {
+      const updateQuery = `UPDATE postulante_idiomas SET nivel = $1 where idioma_id = $2 AND postulante_id = $3 RETURNING idioma_id, nivel`;
+
+      const responseQuery = await db?.query(updateQuery, [
+        nivelIdioma,
+        idiomaId,
+        postulanteId,
+      ]);
+
+      res.status(200).json({
+        data: responseQuery?.rows[0],
+        ok: true,
+      });
+
+      return;
+    }
+
     const query = `
         INSERT INTO postulante_idiomas (postulante_id, idioma_id, nivel)
         VALUES ($1, $2, $3)
@@ -180,4 +206,9 @@ const updateLanguageInfo = async (req: Request, res: Response) => {
   }
 }; //NO SE USA
 
-export { getLanguageInfo, insertLanguageInfo, deleteLanguageInfo, getLanguageList };
+export {
+  getLanguageInfo,
+  insertLanguageInfo,
+  deleteLanguageInfo,
+  getLanguageList,
+};
