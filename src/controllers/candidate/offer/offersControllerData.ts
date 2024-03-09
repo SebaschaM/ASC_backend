@@ -334,13 +334,24 @@ const getOffersDataByJobAndLocation = async (req: Request, res: Response) => {
 const getOfferAreasTop = async (req: Request, res: Response) => {
   try {
     const db = await dbConnect();
-    const query = `SELECT * FROM oferta_area ORDER BY nombre LIMIT 5`;
+    const query = `
+      SELECT 
+          oa.oferta_area_id,
+          oa.nombre AS nombre_area,
+          COUNT(of.area_id) AS contador
+      FROM
+          oferta_area oa
+      LEFT JOIN 
+          oferta of ON of.area_id = oa.oferta_area_id
+      GROUP BY
+          oa.oferta_area_id, oa.nombre`;
 
     const result = await db?.query(query);
     const areas = result?.rows.map((area: any) => {
       return {
         area_id: area.oferta_area_id,
-        nombre: area.nombre,
+        nombre: area.nombre_area,
+        contador: area.contador,
       };
     });
 
