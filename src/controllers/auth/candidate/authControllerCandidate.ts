@@ -57,7 +57,7 @@ const inCompleteRegisterCandidate = async (req: Request, res: Response) => {
     const queryInsert = `INSERT INTO "postulante" (email, account_confirm, email_code, active, created_at) VALUES ($1, FALSE, $2, FALSE, CURRENT_TIMESTAMP)`;
 
     //ASDASD
-    await client?.query(queryInsert, [email, email_code]);  //ASDASD      
+    await client?.query(queryInsert, [email, email_code]); //ASDASD
 
     const sendEmail = createSendEmail(email, email_code);
 
@@ -152,12 +152,12 @@ const loginAuthCandidate = async (req: Request, res: Response) => {
     const client = await dbConnect();
 
     // Obtener el hash de la contraseña almacenada en la base de datos
-    const query = `SELECT * FROM "postulante" WHERE email = $1`;
+    const query = `SELECT * FROM "postulante" WHERE email = $1 AND active = true`;
     const rows = await client?.query(query, [email]);
 
     if (rows?.rows.length === 0) {
       res.status(400).json({
-        message: "El email no se encuentra registrado",
+        message: "El email no se encuentra registrado o se encuentra inactivo",
         status: 400,
       });
       return;
