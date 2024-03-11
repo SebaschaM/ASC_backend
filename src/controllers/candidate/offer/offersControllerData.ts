@@ -62,6 +62,8 @@ const getOffersDataByLocation = async (req: Request, res: Response) => {
         },
         nombre_puesto: offer.nombre_puesto,
         vacantes: offer.vacantes,
+        urgente: offer.urgente,
+        destacado: offer.destacado,
         tipo_moneda: {
           tipo_moneda_id: offer.tipo_moneda_id,
           nombre: offer.nombre_moneda,
@@ -143,6 +145,8 @@ const getOffersDataByJob = async (req: Request, res: Response) => {
         },
         nombre_puesto: offer.nombre_puesto,
         vacantes: offer.vacantes,
+        urgente: offer.urgente,
+        destacado: offer.destacado,
         tipo_moneda: {
           tipo_moneda_id: offer.tipo_moneda_id,
           nombre: offer.nombre_moneda,
@@ -225,6 +229,8 @@ const getOffersDataByOfferArea = async (req: Request, res: Response) => {
         },
         nombre_puesto: offer.nombre_puesto,
         vacantes: offer.vacantes,
+        urgente: offer.urgente,
+        destacado: offer.destacado,
         tipo_moneda: {
           tipo_moneda_id: offer.tipo_moneda_id,
           nombre: offer.nombre_moneda,
@@ -307,6 +313,8 @@ const getOffersDataByJobAndLocation = async (req: Request, res: Response) => {
         },
         nombre_puesto: offer.nombre_puesto,
         vacantes: offer.vacantes,
+        urgente: offer.urgente,
+        destacado: offer.destacado,
         tipo_moneda: {
           tipo_moneda_id: offer.tipo_moneda_id,
           nombre: offer.nombre_moneda,
@@ -345,20 +353,33 @@ const getOfferAreasTop = async (req: Request, res: Response) => {
           oferta of ON of.area_id = oa.oferta_area_id
       GROUP BY
           oa.oferta_area_id, oa.nombre`;
+    const queryCountOffers = `SELECT COUNT(*) FROM oferta WHERE publicacion_automatica = false`;
+    const queryCountComapanies = `SELECT COUNT(*) AS countCompany FROM empresa`;
 
-    const result = await db?.query(query);
-    const areas = result?.rows.map((area: any) => {
+    const resultAreasTop = await db?.query(query);
+    const resultCountOffers = await db?.query(queryCountOffers);
+    const resultCountCompanies = await db?.query(queryCountComapanies);
+    
+    const areas = resultAreasTop?.rows.map((area: any) => {
       return {
         area_id: area.oferta_area_id,
         nombre: area.nombre_area,
         contador: area.contador,
       };
     });
+    const countOffers = resultCountOffers?.rows[0].count;
+    const countCompanies = resultCountCompanies?.rows[0].countcompany;
+
+    const result = {
+      areas,
+      countOffers,
+      countCompanies,
+    };
 
     res.status(200).json({
       ok: true,
+      data: result,
       status: 200,
-      data: areas,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
