@@ -103,4 +103,30 @@ const getAlertOfferDataById = async (req: Request, res: Response) => {
   }
 };
 
-export { getAlertsOffer, updateAlertOffer, insertAlertOffer, getAlertOfferDataById };
+const deleteAlertOffer = async (req: Request, res: Response) => {
+  const { alertId } = req.params;
+
+  try {
+    const db = await dbConnect();
+
+    const query = `DELETE FROM postulante_alertas WHERE alerta_id = $1`;
+
+    await db?.query(query, [alertId]);
+
+    res.status(200).json({
+      ok: true,
+      status: 200,
+      message: "Alerta eliminada correctamente",
+    });
+  } catch (error: any) {
+    return error.message;
+  }
+};
+
+export {
+  getAlertsOffer,
+  updateAlertOffer,
+  insertAlertOffer,
+  getAlertOfferDataById,
+  deleteAlertOffer,
+};
